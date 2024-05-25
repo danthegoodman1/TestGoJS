@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	gojaObject()
+	gojaInstances()
 }
 
 func creation() {
