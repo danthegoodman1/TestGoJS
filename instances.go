@@ -38,7 +38,8 @@ func gojaInstances() {
 			return goja.Undefined()
 		}), goja.FLAG_TRUE, goja.FLAG_TRUE)
 
-		return obj
+		// return obj
+		return nil // will use the obj
 	})
 	s := time.Now()
 	val, err := vm.RunString(`let a = new Thing('blah'); a.SayBlah(); let b = a.Val; a.Val = 'hey'; a.SayBlah()`)
