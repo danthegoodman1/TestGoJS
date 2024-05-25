@@ -35,7 +35,7 @@ func gojaInstances() {
 			// Setter
 			fmt.Println("setting")
 			instance.Val = call.Argument(0).String()
-			return vm.ToValue(instance.Val)
+			return goja.Undefined()
 		}), goja.FLAG_TRUE, goja.FLAG_TRUE)
 
 		return obj
