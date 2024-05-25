@@ -12,13 +12,13 @@ const MultiplyJS = `for (let i = 0; i < 1000; i++) {
 }`
 
 func gojaMultiply() {
+	s := time.Now()
 	vm := goja.New()
 	vm.Set("multiply", func(call goja.FunctionCall) goja.Value {
 		l := call.Arguments[0]
 		r := call.Arguments[1]
 		return vm.ToValue(l.ToFloat() * r.ToFloat())
 	})
-	s := time.Now()
 	val, err := vm.RunString(MultiplyJS)
 	if err != nil {
 		panic(err)
@@ -28,6 +28,7 @@ func gojaMultiply() {
 }
 
 func ottoMultiply() {
+	s := time.Now()
 	vm := otto.New()
 	vm.Set("multiply", func(call otto.FunctionCall) otto.Value {
 		l, _ := call.Argument(0).ToFloat()
@@ -35,7 +36,6 @@ func ottoMultiply() {
 		val, _ := vm.ToValue(l * r)
 		return val
 	})
-	s := time.Now()
 	val, err := vm.Run(MultiplyJS)
 	if err != nil {
 		panic(err)

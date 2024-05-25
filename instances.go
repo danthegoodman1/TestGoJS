@@ -16,6 +16,7 @@ func (t *Thing) SayBlah(call goja.FunctionCall, vm *goja.Runtime) goja.Value {
 }
 
 func gojaInstances() {
+	s := time.Now()
 	vm := goja.New()
 	vm.Set("Thing", func(call goja.ConstructorCall) *goja.Object {
 		instance := Thing{
@@ -41,7 +42,6 @@ func gojaInstances() {
 		// return obj
 		return nil // will use the obj
 	})
-	s := time.Now()
 	val, err := vm.RunString(`let a = new Thing('blah'); a.SayBlah(); let b = a.Val; a.Val = 'hey'; a.SayBlah()`)
 	if err != nil {
 		panic(err)

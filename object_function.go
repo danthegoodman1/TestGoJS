@@ -7,6 +7,7 @@ import (
 )
 
 func gojaObjectFunction() {
+	s := time.Now()
 	vm := goja.New()
 	obj := vm.NewObject()
 	obj.Set("log", func(call goja.FunctionCall) goja.Value {
@@ -20,7 +21,6 @@ func gojaObjectFunction() {
 		return goja.Undefined()
 	})
 	vm.Set("console", obj)
-	s := time.Now()
 	val, err := vm.RunString(`for (let i = 0; i < 10; i++) {
 	console.log(i)
 }`)

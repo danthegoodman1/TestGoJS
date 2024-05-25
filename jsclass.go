@@ -7,9 +7,8 @@ import (
 )
 
 func gojaJSClass() {
-	vm := goja.New()
-
 	s := time.Now()
+	vm := goja.New()
 	_, err := vm.RunString(`
 		class MyClass {
 			constructor() {
