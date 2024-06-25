@@ -33,7 +33,10 @@ func gojaJSClass() {
 		panic(err)
 	}
 
-	fmt.Println(myClassInstance.Keys()) // prints "[i]"
+	fmt.Println(myClassInstance.Keys())                // prints "[i]"
+	fmt.Println(myClassConstructor.Keys())             // prints "[]"
+	fmt.Println(myClassInstance.Prototype().Keys())    // prints "[]"
+	fmt.Println(myClassConstructor.Prototype().Keys()) // prints "[]"
 
 	// Call the DoThing method on the instance
 	doThing, ok := goja.AssertFunction(myClassInstance.Get("DoThing"))
