@@ -33,7 +33,7 @@ func gojaJSClass() {
 		panic(err)
 	}
 
-	// auhtor is adding better method for this https://github.com/dop251/goja/issues/584
+	// author is adding better method for this https://github.com/dop251/goja/issues/584
 
 	getOwnPropertyNames, ok := goja.AssertFunction(vm.Get("Object").ToObject(vm).Get("getOwnPropertyNames"))
 	if !ok {
