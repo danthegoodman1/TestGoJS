@@ -33,10 +33,23 @@ func gojaJSClass() {
 		panic(err)
 	}
 
-	fmt.Println(myClassInstance.Keys())                // prints "[i]"
-	fmt.Println(myClassConstructor.Keys())             // prints "[]"
-	fmt.Println(myClassInstance.Prototype().Keys())    // prints "[]"
-	fmt.Println(myClassConstructor.Prototype().Keys()) // prints "[]"
+	// auhtor is adding better method for this https://github.com/dop251/goja/issues/584
+
+	getOwnPropertyNames, ok := goja.AssertFunction(vm.Get("Object").ToObject(vm).Get("getOwnPropertyNames"))
+	if !ok {
+		panic("failed to assert function")
+	}
+	array, err := getOwnPropertyNames(nil, myClassInstance.Prototype())
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(array.ToObject(vm).Export()) // print class methods
+
+	array, err = getOwnPropertyNames(nil, myClassInstance)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(array.ToObject(vm).Export()) // print properties (internal variables)
 
 	// Call the DoThing method on the instance
 	doThing, ok := goja.AssertFunction(myClassInstance.Get("DoThing"))
