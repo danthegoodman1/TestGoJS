@@ -34,12 +34,11 @@ func gojaJSClass() {
 	}
 
 	// author is adding better method for this https://github.com/dop251/goja/issues/584
-
 	getOwnPropertyNames, ok := goja.AssertFunction(vm.Get("Object").ToObject(vm).Get("getOwnPropertyNames"))
 	if !ok {
 		panic("failed to assert function")
 	}
-	array, err := getOwnPropertyNames(nil, myClassInstance.Prototype())
+	array, err := getOwnPropertyNames(nil, vm.Get("MyClass").ToObject(vm).Get("prototype"))
 	if err != nil {
 		panic(err)
 	}
