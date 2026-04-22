@@ -8,16 +8,21 @@ import (
 	"github.com/robertkrimen/otto"
 )
 
-const jsonScript = `var payload = {hey: 'hi', num: 1}
+// factorialScript exposes a `loop(N)` entry point that recursively computes
+// factorial(10) N times. Both engines reach the hot path through the same
+// script, so the only thing that varies is the engine.
+const factorialScript = `function factorial(n) {
+    return n === 1 ? n : n * factorial(--n)
+}
 function loop(N) {
     for (var i = 0; i < N; i++) {
-        JSON.stringify(payload)
+        factorial(10)
     }
 }`
 
-func benchGojaJSONStringify(b *testing.B) {
+func benchGojaFactorial(b *testing.B) {
 	vm := goja.New()
-	if _, err := vm.RunString(jsonScript); err != nil {
+	if _, err := vm.RunString(factorialScript); err != nil {
 		b.Fatal(err)
 	}
 	loop, ok := goja.AssertFunction(vm.Get("loop"))
@@ -32,9 +37,9 @@ func benchGojaJSONStringify(b *testing.B) {
 	}
 }
 
-func benchOttoJSONStringify(b *testing.B) {
+func benchOttoFactorial(b *testing.B) {
 	vm := otto.New()
-	if _, err := vm.Run(jsonScript); err != nil {
+	if _, err := vm.Run(factorialScript); err != nil {
 		b.Fatal(err)
 	}
 

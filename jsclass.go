@@ -1,62 +1,48 @@
 package main
 
 import (
-	"fmt"
+	"errors"
+	"testing"
+
 	"github.com/dop251/goja"
-	"time"
 )
 
-func gojaJSClass() {
-	s := time.Now()
+// JS class benchmark: define a MyClass once and then instantiate + call a
+// method in a JS loop. Otto has no equivalent benchmark because it doesn't
+// support ES6 class syntax.
+
+const jsClassScript = `
+class MyClass {
+    constructor() {
+        this.i = 0
+    }
+    DoThing() {
+        this.i++
+        return this.i
+    }
+}
+function loop(N) {
+    for (var i = 0; i < N; i++) {
+        var m = new MyClass()
+        m.DoThing()
+        m.DoThing()
+    }
+}
+`
+
+func benchGojaJSClass(b *testing.B) {
 	vm := goja.New()
-	_, err := vm.RunString(`
-		class MyClass {
-			constructor() {
-				this.i = 0;
-			}
-			DoThing() {
-				this.i++;
-				return this.i;
-			}
-		}
-	`)
-	if err != nil {
-		panic(err)
+	if _, err := vm.RunString(jsClassScript); err != nil {
+		b.Fatal(err)
 	}
-
-	// Retrieve the MyClass constructor from the VM
-	myClassConstructor := vm.Get("MyClass").ToObject(vm)
-
-	// Create an instance of MyClass
-	myClassInstance, err := vm.New(myClassConstructor)
-	if err != nil {
-		panic(err)
-	}
-
-	// print class methods, can also do with this function
-	fmt.Println(myClassConstructor.Get("prototype").ToObject(vm).GetOwnPropertyNames())
-	// print properties (internal variables)
-	fmt.Println(myClassInstance.GetOwnPropertyNames())
-
-	// Call the DoThing method on the instance
-	doThing, ok := goja.AssertFunction(myClassInstance.Get("DoThing"))
+	loop, ok := goja.AssertFunction(vm.Get("loop"))
 	if !ok {
-		panic("did not get dothing")
+		b.Fatal(errors.New("loop missing"))
 	}
+	n := vm.ToValue(b.N)
 
-	result, err := doThing(myClassInstance)
-	if err != nil {
-		panic(err)
+	b.ResetTimer()
+	if _, err := loop(goja.Undefined(), n); err != nil {
+		b.Fatal(err)
 	}
-
-	fmt.Println("Result of DoThing:", result.ToInteger())
-
-	result, err = doThing(myClassInstance)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println("Result of DoThing (second):", result.ToInteger())
-
-	fmt.Println("Goja execution time:", time.Now().Sub(s))
 }

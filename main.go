@@ -1,124 +1,42 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
-	"github.com/dop251/goja"
-	"github.com/google/pprof/profile"
-	"github.com/robertkrimen/otto"
-	"time"
+	"os"
 )
 
 func main() {
-	// gojaJSClass()
-	profiled()
-}
+	benchmarks := []benchmark{
+		{name: "goja: factorial(10) in JS loop", fn: benchGojaFactorial},
+		{name: "otto: factorial(10) in JS loop", fn: benchOttoFactorial},
 
-func creation() {
-	js := `function factorial(n) {
-    return n === 1 ? n : n * factorial(--n);
-}
+		{name: "goja: JS->Go callback (multiply)", fn: benchGojaMultiplyJSToGo},
+		{name: "otto: JS->Go callback (multiply)", fn: benchOttoMultiplyJSToGo},
 
-var i = 0;
+		{name: "goja: Go->JS call (multiply)", fn: benchGojaMultiplyGoToJS},
+		{name: "otto: Go->JS call (multiply)", fn: benchOttoMultiplyGoToJS},
 
-while (i++ < 1e6) {
-    factorial(10);
-}`
+		{name: "goja: JSON.stringify small object", fn: benchGojaJSONStringify},
+		{name: "otto: JSON.stringify small object", fn: benchOttoJSONStringify},
 
-	vm := otto.New()
-	s := time.Now()
-	_, err := vm.Run(js)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Otto in", time.Now().Sub(s))
+		{name: "goja: Go->JS->Go object roundtrip", fn: benchGojaObjectRoundtrip},
+		{name: "otto: Go->JS->Go object roundtrip", fn: benchOttoObjectRoundtrip},
 
-	gm := goja.New()
-	s = time.Now()
-	_, err = gm.RunString(js)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Goja in", time.Now().Sub(s))
+		{name: "goja: console.log shim (nested Go cb)", fn: benchGojaConsoleShim},
+		{name: "otto: console.log shim (nested Go cb)", fn: benchOttoConsoleShim},
 
-}
-
-func profiled() {
-	js := `function factorial(n) {
-    return n === 1 ? n : n * factorial(--n);
-}
-
-var i = 0;
-
-while (i++ < 100000) {
-    factorial(10);
-}`
-
-	b := &bytes.Buffer{}
-
-	err := goja.StartProfile(b)
-	if err != nil {
-		panic(err)
+		{name: "goja: Go-backed class (new Thing + access)", fn: benchGojaGoBackedClass},
+		{name: "goja: ES6 class new + method", fn: benchGojaJSClass},
 	}
 
-	gm := goja.New()
-	s := time.Now()
-	_, err = gm.RunString(js)
-	if err != nil {
-		panic(err)
+	results := runBenchmarks(benchmarks)
+
+	fmt.Println()
+	printMarkdownTable(os.Stdout, results)
+
+	for _, r := range results {
+		if r.summary.N == 0 {
+			os.Exit(1)
+		}
 	}
-	fmt.Println("Goja in", time.Now().Sub(s))
-
-	goja.StopProfile()
-
-	// read the profile
-	p, err := profile.Parse(bytes.NewReader(b.Bytes()))
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(p)
-}
-
-func factorial() {
-	js := `function factorial(n) {
-    return n === 1 ? n : n * factorial(--n);
-}
-
-var i = 0;
-
-while (i++ < 1e6) {
-    factorial(10);
-}`
-
-	vm := otto.New()
-	s := time.Now()
-	_, err := vm.Run(js)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Otto in", time.Now().Sub(s))
-
-	gm := goja.New()
-	s = time.Now()
-	_, err = gm.RunString(js)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Goja in", time.Now().Sub(s))
-
-	vm = otto.New()
-	s = time.Now()
-	_, err = vm.Run(js)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Otto in", time.Now().Sub(s))
-
-	gm = goja.New()
-	s = time.Now()
-	_, err = gm.RunString(js)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Goja in", time.Now().Sub(s))
 }
